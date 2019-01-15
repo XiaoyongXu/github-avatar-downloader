@@ -12,15 +12,32 @@ function getRepoContributors(repoOwner, repoName, cb) {
   };
 
   request(options, function(err, res, body) {
-    cb(err, body);
+    var result = JSON.parse(body);
+    cb(err, result);
   });
 }
 
-getRepoContributors("jquery", "jquery", function(err, result) {
+getRepoContributors("jquery", "jquery", function(err, contributors) {
   console.log("Errors:", err);
-  var url = JSON.parse(result)
-  for (var i = 0; i < url.length; i++){
-    console.log("Result:", url[i].avatar_url);
-  }
+  
+  contributors.forEach(function(contributor) {
+    downloadImageByURL(contributor.avatar_url, "./download/"+ contributor.login + ".jpg");
+  });
+  // for (var i = 0; i < url.length; i++){
+    
+  // }
   
 });
+
+function downloadImageByURL(url, filePath) {
+  var fs = require('fs');
+  request.get(url)               // Note 1
+    .on('error', function (err) {                                   // Note 2
+      throw err; 
+    })
+    .on('response', function (response) {                           // Note 3
+        console.log('Response Status Code: ', response.statusCode);
+    })
+    .pipe(fs.createWriteStream(filePath));  
+}
+// downloadImageByURL("https://avatars2.githubusercontent.com/u/2741?v=3&s=466", "kvirani.jpg");
